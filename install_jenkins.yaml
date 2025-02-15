@@ -1,0 +1,36 @@
+---
+- name: Install Jenkins on EC2 instances
+  hosts: jenkins_master
+  become: yes
+  tasks:
+    - name: Install Java (required for Jenkins)
+      yum:
+        name: java-1.8.0-openjdk-devel
+        state: present
+
+    - name: Add Jenkins repository
+      yum_repository:
+        name: jenkins
+        description: Jenkins Repository
+        baseurl: https://pkg.jenkins.io/redhat/$(arch)
+        gpgcheck: 1
+        enabled: 1
+        gpgkey: https://pkg.jenkins.io/redhat/jenkins.io.key
+
+    - name: Install Jenkins
+      yum:
+        name: jenkins
+        state: present
+
+    - name: Start Jenkins service
+      systemd:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: Open Jenkins port in firewall (if needed)
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+        immediate: yes
