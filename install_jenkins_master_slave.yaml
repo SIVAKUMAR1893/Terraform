@@ -1,0 +1,23 @@
+---
+- name: Configure Jenkins Master Node
+  hosts: jenkins_master
+  become: yes
+  tasks:
+    - name: Ensure Jenkins is running
+      systemd:
+        name: jenkins
+        state: started
+        enabled: yes
+
+- name: Configure Jenkins Slave Node
+  hosts: jenkins_slave
+  become: yes
+  tasks:
+    - name: Install required packages
+      yum:
+        name: java-1.8.0-openjdk
+        state: present
+
+    - name: Start Jenkins Slave agent
+      shell: |
+        java -jar /var/lib/jenkins/agent.jar -jnlpUrl http://<jenkins_master_ip>:8080/computer/$(hostname)/slave-agent.jnlp
